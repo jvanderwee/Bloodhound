@@ -1,0 +1,3 @@
+include ':tracker-annotations'
+include ':tracker-plugin'
+include ':tracker-runtime'

@@ -8,8 +8,6 @@ import static java.lang.annotation.ElementType.METHOD;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({METHOD})
-public @interface TrackEvent {
-    String category();
-    String action();
-    String label();
+public @interface TrackScreen {
+    String value();
 }

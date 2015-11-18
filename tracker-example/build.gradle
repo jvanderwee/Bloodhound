@@ -22,6 +22,8 @@ dependencies {
         // NOTE: This is only needed when developing the plugin!
         mavenLocal()
     }
+
+    compile 'com.jakewharton:butterknife:7.0.1'
 }
 
 android {

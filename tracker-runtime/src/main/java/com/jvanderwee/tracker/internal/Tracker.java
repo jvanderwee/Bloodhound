@@ -2,6 +2,7 @@ package com.jvanderwee.tracker.internal;
 
 import android.util.Log;
 
+import com.google.android.gms.analytics.HitBuilders;
 import com.jvanderwee.tracker.TrackEvent;
 import com.jvanderwee.tracker.TrackScreen;
 
@@ -18,6 +19,7 @@ import java.lang.reflect.Method;
 @Aspect
 public class Tracker {
     private static volatile boolean enabled = true;
+    private static volatile com.google.android.gms.analytics.Tracker tracker;
 
     @Pointcut("execution(@com.jvanderwee.tracker.TrackEvent * *(..))")
     public void trackEventMethod() {}
@@ -29,6 +31,10 @@ public class Tracker {
         Tracker.enabled = enabled;
     }
 
+    public static void setTracker(com.google.android.gms.analytics.Tracker tracker) {
+        Tracker.tracker = tracker;
+    }
+
     @Around("trackEventMethod() || trackScreenMethod()")
     public Object logAndExecute(ProceedingJoinPoint joinPoint) throws Throwable {
         enterMethod(joinPoint);
@@ -36,7 +42,7 @@ public class Tracker {
     }
 
     private static void enterMethod(JoinPoint joinPoint) {
-        if (!enabled) return;
+        if (!enabled || tracker == null) return;
 
         CodeSignature codeSignature = (CodeSignature) joinPoint.getSignature();
 
@@ -53,6 +59,11 @@ public class Tracker {
                             trackEvent.category(),
                             trackEvent.action(),
                             trackEvent.label()));
+            tracker.send(new HitBuilders.EventBuilder()
+                    .setCategory(trackEvent.category())
+                    .setAction(trackEvent.action())
+                    .setLabel(trackEvent.label())
+                    .build());
         }
 
         TrackScreen trackScreen = m.getAnnotation(TrackScreen.class);
@@ -60,6 +71,8 @@ public class Tracker {
         if (trackScreen != null) {
             Log.v(asTag(cls),
                     String.format("Tracking screen with name '%s'", trackScreen.value()));
+            tracker.setScreenName(trackScreen.value());
+            tracker.send(new HitBuilders.ScreenViewBuilder().build());
 
         }
     }

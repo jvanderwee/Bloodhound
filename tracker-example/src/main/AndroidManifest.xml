@@ -10,7 +10,7 @@
         android:minSdkVersion="9"
         android:targetSdkVersion="23"/>
 
-    <application>
+    <application android:name=".TrackerApplication">
         <activity
             android:label="Tracker Example"
             android:name=".MainActivity"
